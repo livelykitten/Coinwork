@@ -189,6 +189,8 @@ class Monitor:
 		ctypes.windll.user32.MessageBoxW(0, alarm.text, "알림", 0)
 	
 	def send_alarm(self, alarm):
+		if not ALARM_SWITCH:
+			return
 		threading.Thread(target=Monitor.alarm_thread_func, args=(self, alarm)).start()
 
 	def _monitor(self):
@@ -306,12 +308,13 @@ while True:
 		print(text)
 	if user_input == 'm':
 		print(monitor.list_messages())
-		# if ALARM_SWITCH:
-		# 	ALARM_SWITCH = False
-		# 	print("모든 알람이 꺼졌습니다")
-		# else:
-		# 	ALARM_SWITCH = True
-		# 	print("알람이 다시 작동합니다")
+	if user_input == 's':
+		if ALARM_SWITCH:
+			ALARM_SWITCH = False
+			print("모든 알람이 꺼졌습니다")
+		else:
+			ALARM_SWITCH = True
+			print("알람이 다시 작동합니다")
 	if user_input == 'a':
 		print("알람을 추가합니다")
 
