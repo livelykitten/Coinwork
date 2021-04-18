@@ -11,6 +11,7 @@ import UpbitWrapper
 from playsound import playsound
 
 ALARM_SWITCH = True
+SOUND_SWITCH = True
 
 def tdstr(td):
 	days = ""
@@ -156,6 +157,8 @@ class Monitor:
 		self.criteria_lock = threading.Lock()
 		self.message = deque()
 		self.message_lock = threading.Lock()
+		self.alarm_window_num = 0
+		self.alarm_window_lock = threading.Lock()
 	
 	def update_messages(self, new_messages):
 		self.message_lock.acquire(blocking=True)
@@ -185,12 +188,19 @@ class Monitor:
 		
 	
 	def alarm_thread_func(self, alarm):
-		playsound('./alarm.mp3')
+		if SOUND_SWITCH:
+			playsound('./alarm.wav')
+		if not ALARM_SWITCH or self.alarm_window_num > 10:
+			return
+		self.alarm_window_lock.acquire(blocking=True)
+		self.alarm_window_num += 1
+		self.alarm_window_lock.release()
 		ctypes.windll.user32.MessageBoxW(0, alarm.text, "알림", 0)
+		self.alarm_window_lock.acquire(blocking=True)
+		self.alarm_window_num -= 1
+		self.alarm_window_lock.release()
 	
 	def send_alarm(self, alarm):
-		if not ALARM_SWITCH:
-			return
 		threading.Thread(target=Monitor.alarm_thread_func, args=(self, alarm)).start()
 
 	def _monitor(self):
@@ -271,6 +281,8 @@ monitor.start()
 
 print("===============================")
 print("환영합니다! 도움말은 h를 입력하세요")
+print("주의: 알람 메세지 박스는 최신이 아닐 수 있습니다")
+print("주의: m을 입력해 메세지함을 사용하세요")
 print("===============================")
 
 while True:
@@ -282,7 +294,8 @@ while True:
 			알람 추가는 a를 입력하세요\n \
 			알람 목록 보기는 l을 입력하세요\n \
 			알람 삭제를 위해선 r <알람 ID>를 입력하세요 (예시: r 3)\n \
-			전체 알람 끄기/켜기는 s을 입력하세요\n \
+			전체 알람 끄기/켜기는 d을 입력하세요\n \
+			알람 소리 끄기/켜기는 s을 입력하세요\n \
 			메세지함은 m을 입력하세요"
 		print(help_text)
 	
@@ -309,13 +322,20 @@ while True:
 		print(text)
 	if user_input == 'm':
 		print(monitor.list_messages())
-	if user_input == 's':
+	if user_input == 'd':
 		if ALARM_SWITCH:
 			ALARM_SWITCH = False
 			print("모든 알람이 꺼졌습니다")
 		else:
 			ALARM_SWITCH = True
 			print("알람이 다시 작동합니다")
+	if user_input == 's':
+		if SOUND_SWITCH:
+			SOUND_SWITCH = False
+			print("곧 모든 소리가 꺼집니다")
+		else:
+			SOUND_SWITCH = True
+			print("소리가 켜졌습니다")
 	if user_input == 'a':
 		print("알람을 추가합니다")
 
