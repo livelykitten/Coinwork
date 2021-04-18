@@ -8,7 +8,7 @@ import ctypes
 import os
 
 import UpbitWrapper
-
+from playsound import playsound
 
 ALARM_SWITCH = True
 
@@ -185,7 +185,7 @@ class Monitor:
 		
 	
 	def alarm_thread_func(self, alarm):
-		print('\a', end='')
+		playsound('./alarm.mp3')
 		ctypes.windll.user32.MessageBoxW(0, alarm.text, "알림", 0)
 	
 	def send_alarm(self, alarm):
@@ -282,7 +282,8 @@ while True:
 			알람 추가는 a를 입력하세요\n \
 			알람 목록 보기는 l을 입력하세요\n \
 			알람 삭제를 위해선 r <알람 ID>를 입력하세요 (예시: r 3)\n \
-			전체 알람 끄기/켜기는 m을 입력하세요"
+			전체 알람 끄기/켜기는 s을 입력하세요\n \
+			메세지함은 m을 입력하세요"
 		print(help_text)
 	
 	if user_input == 'q':
