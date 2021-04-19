@@ -215,6 +215,8 @@ class Monitor:
 		
 		market_tickers = {} # dict, key: market code
 		for market in r_dict:
+			if "KRW" not in market['market']:
+				continue
 			cur_price = market['trade_price']
 			timestamp = market['timestamp']  / 1e3
 			item = Ticker(markets[market['market']], 0, cur_price, timestamp)
