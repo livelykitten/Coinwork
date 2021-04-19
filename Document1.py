@@ -117,11 +117,11 @@ class Alarm:
 	def __init__(self, time, market_code, market_name, market_cap, d_ratio, d_time):
 		# text = market_code_to_kor[self.market_code] + "(" + self.market + "): "
 		self.time = time
-		self.text = market_name + "(" + market_code + "): "
-		self.text += "지난 " + tdstr(datetime.timedelta(seconds=d_time)) + " 동안"
+		# self.text = market_name + "(" + market_code + "): "
+		self.text = "지난 " + tdstr(datetime.timedelta(seconds=d_time)) + " 동안"
 		self.text += f"{d_ratio * 100:.3f}% 변화했습니다\n"
 		# self.text += f"현재 시세는 {cur_price:.2f}, 현재 시간은 {datetime.datetime.fromtimestamp(time)} 입니다"
-		self.text += f"현재 시간은 {datetime.datetime.fromtimestamp(time)} 입니다"
+		# self.text += f"현재 시간은 {datetime.datetime.fromtimestamp(time)} 입니다"
 	def __str__(self):
 		return self.text
 

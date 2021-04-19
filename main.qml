@@ -69,12 +69,14 @@ ApplicationWindow {
     }
     Timer {
         interval: 500; running: true; repeat: true
-        onTriggered: function () {
-            monitor.monitor();
-            if (monitor.message_left()) {
-            }
-            while (monitor.message_left()) {
-                msgList.model.add_item_sorted(JSON.parse(monitor.get_message()))
+        onTriggered: {
+            var message_raw = monitor.get_messages_str()
+            if (message_raw === "")
+                return
+            var message_list = message_raw.split("$")
+
+            for (var i = 0; i < message_list.length; i++) {
+                msgList.model.add_item_sorted(JSON.parse(message_list[i]))
             }
         }
     }

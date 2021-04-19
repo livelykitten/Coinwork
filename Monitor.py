@@ -1,12 +1,12 @@
 import time
+import threading
 
 import json
 import datetime
 from collections import deque
-import ctypes
 import os
 
-from PySide6.QtCore import QObject
+import UpbitWrapper
 
 
 def tdstr(td):
@@ -148,20 +148,111 @@ class Criteria:
         
         return alarms
 
-# def monitor_init():
-#     return
 
-# def update_monitor():
-#     monitor.monitor()
+class Monitor():
+    def __init__(self):
+        super().__init__()
+        self.criteria_id = 1
+        self.criteria = []
+        self.criteria_lock = threading.Lock()
+        self.message = ""
+        self.message_lock = threading.Lock()
 
-# def msg_left():
-#     return monitor.message_left()
+    def message_left(self):
+        if (len(self.message)) == 0:
+            return False
+        return True
 
-# def get_msg():
-#     return monitor.get_message()
+    def get_messages(self):
+        self.message_lock.acquire(blocking=True)
+        ret = self.message
+        self.message = ""
+        self.message_lock.release()
+        return ret
+    
+    
 
-# def add_criteria(d_ratio, d_time, cooldown):
-#     return monitor.add_criteria(d_ratio, d_time, cooldown)
+    def update_messages(self, msg):
+        self.message_lock.acquire(blocking=True)
+        
+        for m in msg:
+            if self.message == "":
+                self.message = json.dumps(m.__dict__)
+            else:
+                self.message += "$" + json.dumps(m.__dict__)
 
-# def remove_criteria(cid):
-#     return monitor.remove_criteria(cid)
+        self.message_lock.release()
+        return
+    
+    def _monitor_wrapper(self):
+        self._monitor()
+        threading.Timer(0.1, Monitor._monitor_wrapper, args=(self,)).start()
+    
+    def start(self):
+        threading.Thread(target=Monitor._monitor_wrapper, args=(self,)).start()
+
+    def _monitor(self):
+        new_messages = []
+        markets = UpbitWrapper.get_all_markets()
+        if markets == None:
+            return
+
+        r_dict = UpbitWrapper.get_tickers(markets)
+        if r_dict == None:
+            return
+
+        market_tickers = {} # dict, key: market code
+        for market in r_dict:
+            cur_price = market['trade_price']
+            timestamp = market['timestamp']  / 1e3
+            item = Ticker(markets[market['market']], 0, cur_price, timestamp)
+            market_tickers[market['market']] = item
+
+        self.criteria_lock.acquire(blocking=True)
+        for criterion in self.criteria:
+            new_messages.extend(criterion.update_monitors(market_tickers))
+        self.criteria_lock.release()
+
+        self.update_messages(new_messages)
+
+        return
+
+    # @Slot(float, float, float, result = int)
+    def add_criteria(self, d_ratio, d_time, cooldown):
+        new_criteria = Criteria(self.criteria_id, d_ratio, d_time, cooldown)
+        self.criteria_lock.acquire(blocking=True)
+        self.criteria_id += 1
+        cid = self.criteria_id
+        self.criteria.append(new_criteria)
+        self.criteria_lock.release()
+        return cid - 1
+
+    # def list_criteria(self):
+    # 	text = ""
+    # 	self.criteria_lock.acquire(blocking=True)
+    # 	for c in self.criteria:
+    # 		text += f"알람 ID: {c.cid} 변화율: {c.d_ratio * 100}% 시간 간격: {datetime.timedelta(seconds=c.d_time)} 알람 주기: {datetime.timedelta(seconds=c.cooldown)}"
+    # 	self.criteria_lock.release()
+    # 	return text
+
+    # @Slot(int, result = int)
+    def remove_criteria(self, cid):
+        i = 0
+        self.criteria_lock.acquire(blocking=True)
+        for i in range(len(self.criteria)):
+            if self.criteria[i].cid == cid:
+                self.criteria.pop(i)
+                self.criteria_lock.release()
+                return True
+        self.criteria_lock.release()
+        return False
+
+    # def list_messages(self):
+    # 	text = ""
+    # 	self.message_lock.acquire(blocking=True)
+    # 	for item in self.message:
+    # 		text += "-----------------------------------------------\n"
+    # 		text += str(datetime.datetime.fromtimestamp(item.time)) + "\n"
+    # 		text += item.text + "\n"
+    # 	self.message_lock.release()
+    # 	return text
