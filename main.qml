@@ -9,10 +9,7 @@ ApplicationWindow {
     height: 640
     visible: true
     title: qsTr("Hello World")
-    Timer {
-        interval: 50; running: true; repeat: true
-        onTriggered: function () { monitor.update(); label.text = monitor.get() }
-    }
+
     header: TabBar {
         id: bar
         width: parent.width
@@ -31,7 +28,6 @@ ApplicationWindow {
             id: msgTab
             ListView {
                 id: msgList
-                rotation: 180
                 anchors {
                            top: parent.top // button.bottom
                            bottom: parent.bottom
@@ -41,16 +37,45 @@ ApplicationWindow {
                 model: MsgModel {}
                 delegate: MsgDelegate {}
             }
-
-            Label {
-                id: label
-                text: monitor.get()
-                font.pixelSize: 22
-                // anchors.horizontalCenter: msgTab.horizontalCenter
-            }
         }
         Item {
             id: alarmTab
+            ListView {
+                id: alarmList
+                anchors {
+                           top: parent.top // button.bottom
+                           bottom: parent.bottom
+                           left: parent.left
+                           right: parent.right
+                       }
+                model: AlarmModel {}
+                delegate: AlarmDelegate {}
+            }
+            RoundButton {
+                id: addAlarmButton
+                text: "+"
+                anchors.bottom: alarmList.bottom
+                anchors.bottomMargin: 8
+                anchors.horizontalCenter: parent.horizontalCenter
+                onClicked: alarmDialog.open()
+            }
+        }
+    }
+    AlarmDialog {
+        id: alarmDialog
+        x: Math.round((parent.width - width) / 2)
+        y: Math.round((parent.height - height) / 2)
+        alarmModel: alarmList.model
+    }
+    Timer {
+        interval: 500; running: true; repeat: true
+        onTriggered: function () {
+            monitor.monitor();
+            if (monitor.message_left()) {
+            }
+            while (monitor.message_left()) {
+                msgList.model.add_item_sorted(JSON.parse(monitor.get_message()))
+            }
         }
     }
 }

@@ -9,7 +9,6 @@ import QtQuick.Window 2.11
 
 ItemDelegate {
     id: root
-    rotation: 180
     width: ListView.view.width
     anchors.leftMargin: 100
     anchors.rightMargin: 100
@@ -17,7 +16,7 @@ ItemDelegate {
 
         RowLayout {
             Label {
-                text: (new Date(model.msg_timestamp)).toLocaleString()
+                text: (new Date(model.msg_timestamp * 1000)).toLocaleString()
             }
             Label {
                 text: model.msg_market

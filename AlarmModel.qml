@@ -4,9 +4,12 @@ import QtQml.Models 2.15
 ListModel {
     id: alarmModel
 
+    property var cid: 0
+
     ListElement {
-        msg_timestamp: 1618730000
-        msg_market: qsTr("")
-        msg_text: qsTr("Welcome!!!")
+        alarm_id: 0
+        alarm_d_ratio: 0.1
+        alarm_d_time: 900
+        alarm_cooldown: 900
     }
 }

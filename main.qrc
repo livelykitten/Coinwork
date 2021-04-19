@@ -5,5 +5,7 @@
         <file>MsgDelegate.qml</file>
         <file>AlarmModel.qml</file>
         <file>AlarmDelegate.qml</file>
+        <file>AlarmDialog.qml</file>
+        <file>MsgDialog.qml</file>
     </qresource>
 </RCC>

@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE QtCreatorProject>
-<!-- Written by QtCreator 4.14.2, 2021-04-18T17:10:41. -->
+<!-- Written by QtCreator 4.14.2, 2021-04-19T11:04:14. -->
 <qtcreator>
  <data>
   <variable>EnvironmentId</variable>
@@ -169,16 +169,16 @@
     <valuelist type="QVariantList" key="CustomOutputParsers"/>
     <value type="int" key="PE.EnvironmentAspect.Base">2</value>
     <valuelist type="QVariantList" key="PE.EnvironmentAspect.Changes"/>
-    <value type="QString" key="ProjectExplorer.ProjectConfiguration.DisplayName">main</value>
-    <value type="QString" key="ProjectExplorer.ProjectConfiguration.Id">PythonEditor.RunConfiguration.C:/Users/Tony Min/Documents/qtproj/untitled/main.py</value>
-    <value type="QString" key="ProjectExplorer.RunConfiguration.BuildKey">C:/Users/Tony Min/Documents/qtproj/untitled/main.py</value>
+    <value type="QString" key="ProjectExplorer.ProjectConfiguration.DisplayName">main2</value>
+    <value type="QString" key="ProjectExplorer.ProjectConfiguration.Id">PythonEditor.RunConfiguration.C:/Users/Tony Min/Documents/Coinwork/main.py</value>
+    <value type="QString" key="ProjectExplorer.RunConfiguration.BuildKey">C:/Users/Tony Min/Documents/Coinwork/main.py</value>
     <value type="QString" key="PythonEditor.RunConfiguation.Interpreter">{92d375fe-f3f6-4dd7-9a8f-a89f27b74ee5}</value>
-    <value type="QString" key="PythonEditor.RunConfiguation.Script">C:\Users\Tony Min\Documents\qtproj\untitled\main.py</value>
+    <value type="QString" key="PythonEditor.RunConfiguation.Script">C:\Users\Tony Min\Documents\Coinwork\main.py</value>
     <value type="bool" key="RunConfiguration.UseCppDebugger">false</value>
     <value type="bool" key="RunConfiguration.UseCppDebuggerAuto">true</value>
     <value type="bool" key="RunConfiguration.UseQmlDebugger">false</value>
     <value type="bool" key="RunConfiguration.UseQmlDebuggerAuto">true</value>
-    <value type="QString" key="RunConfiguration.WorkingDirectory.default">C:/Users/Tony Min/Documents/qtproj/untitled</value>
+    <value type="QString" key="RunConfiguration.WorkingDirectory.default">C:/Users/Tony Min/Documents/Coinwork</value>
    </valuemap>
    <value type="int" key="ProjectExplorer.Target.RunConfigurationCount">1</value>
   </valuemap>
