@@ -45,7 +45,7 @@ if __name__ != "__main__":
     sys.exit(1)
 
 # os.environ["QT_QUICK_CONTROLS_STYLE"] = "Material"
-sys.argv += ['--style', 'Material']
+sys.argv += ['--style', 'Material', "--platform", "windows:dpiawareness=0"]
 
 app = QGuiApplication(sys.argv)
 engine = QQmlApplicationEngine()

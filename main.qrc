@@ -7,5 +7,6 @@
         <file>AlarmDelegate.qml</file>
         <file>AlarmDialog.qml</file>
         <file>MsgDialog.qml</file>
+        <file>alarm.wav</file>
     </qresource>
 </RCC>

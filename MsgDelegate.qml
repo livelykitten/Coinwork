@@ -12,18 +12,30 @@ ItemDelegate {
     width: ListView.view.width
     anchors.leftMargin: 100
     anchors.rightMargin: 100
+    highlighted: model.user_checked === false
     contentItem: ColumnLayout {
-
         RowLayout {
+            width: parent.width
             Label {
                 text: (new Date(model.msg_timestamp * 1000)).toLocaleString()
             }
+            Item { Layout.fillWidth: true }
             Label {
-                text: model.msg_market
+                id: is_read
+                text: if (model.user_checked === false) {"not read"} else {"read"}
             }
         }
         Label {
-            text: model.msg_text
+            text: model.msg_market
         }
+        Label {
+            text: model.msg_text
+            Layout.fillWidth: true
+            wrapMode: Label.WordWrap
+        }
+    }
+    onClicked: {
+        highlighted = false
+        is_read.text = "read"
     }
 }

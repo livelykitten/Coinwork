@@ -106,6 +106,10 @@ class MarketMonitor:
         
         # if satisfies condition, send off an alarm
         if abs(true_change) > abs(self.change) and true_change * self.change > 0 and self.is_active:
+            # print("-----------------------")
+            # print(self.market_code)
+            # print(f"first time {first.timestamp} last time {outranged.timestamp}")
+            # print(f"first price {first.price} last price {outranged.price}")
             self.time_disabled = datetime.datetime.now().timestamp()
             self.is_active = False
             return Alarm(first.timestamp, self.market_code, first.market_name, 0, true_change, true_interval)
@@ -119,8 +123,9 @@ class Alarm:
         self.msg_text = market_name + "(" + market_code + "): "
         self.msg_text += "지난 " + tdstr(datetime.timedelta(seconds=d_time)) + " 동안"
         self.msg_text += f"{d_ratio * 100:.3f}% 변화했습니다\n"
+        self.user_checked = False
         # self.text += f"현재 시세는 {cur_price:.2f}, 현재 시간은 {datetime.datetime.fromtimestamp(time)} 입니다"
-        self.msg_text += f"현재 시간은 {datetime.datetime.fromtimestamp(time)} 입니다"
+        # self.msg_text += f"현재 시간은 {datetime.datetime.fromtimestamp(time)} 입니다"
     def __str__(self):
         return self.msg_text
 
@@ -203,6 +208,8 @@ class Monitor():
 
         market_tickers = {} # dict, key: market code
         for market in r_dict:
+            if "KRW" not in market['market']:
+                continue
             cur_price = market['trade_price']
             timestamp = market['timestamp']  / 1e3
             item = Ticker(markets[market['market']], 0, cur_price, timestamp)
