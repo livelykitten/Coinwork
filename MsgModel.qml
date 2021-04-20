@@ -7,7 +7,7 @@ ListModel {
     ListElement {
         msg_timestamp: 1618730000
         msg_market: qsTr("")
-        msg_text: qsTr("Welcome!!!")
+        msg_text: qsTr("환영합니다!")
         user_checked: true
     }
 

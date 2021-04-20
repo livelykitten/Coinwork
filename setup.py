@@ -1,11 +1,11 @@
 from cx_Freeze import setup, Executable
  
-buildOptions = dict(packages=['requests', 'time', 'threading', 'json', 'datetime', 'collections', 'ctypes', 'os', 'winsound'], excludes = ["tkinter", "numpy"])
+buildOptions = dict(packages=['requests', 'time', 'threading', 'json', 'datetime', 'collections', 'ctypes', 'os', 'winsound', 'PySide6'], excludes = ["tkinter", "numpy"])
  
-exe = [Executable('Document1.py')]
+exe = [Executable('main.py', base = "Win32GUI")]
  
 setup(
-    name='BitcoinWatcher',
+    name='CoinWatcher',
     version='0.0.1',
     author='Tony Min',
     description = 'description',

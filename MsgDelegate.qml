@@ -22,7 +22,7 @@ ItemDelegate {
             Item { Layout.fillWidth: true }
             Label {
                 id: is_read
-                text: if (model.user_checked === false) {"not read"} else {"read"}
+                text: if (model.user_checked === false) {"안읽음"} else {"읽음"}
             }
         }
         Label {
@@ -36,6 +36,6 @@ ItemDelegate {
     }
     onClicked: {
         highlighted = false
-        is_read.text = "read"
+        is_read.text = "읽음"
     }
 }

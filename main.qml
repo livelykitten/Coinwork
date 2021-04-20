@@ -12,6 +12,13 @@ ApplicationWindow {
     visible: true
     title: qsTr("코인 감시자")
 
+    property bool firstclick: true
+
+    onClosing: {
+        monitor.pause()
+        monitor.end()
+    }
+
     header: TabBar {
         id: bar
         width: parent.width
@@ -19,13 +26,20 @@ ApplicationWindow {
             id: msgButton
             text: qsTr("메세지함")
             onClicked: {
-//                msgSound.stop()
+                monitor.pause()
                 msgButtonHighlighter.stop()
                 bar.currentIndex = 0
             }
         }
         TabButton {
             text: qsTr("알람 목록")
+            onClicked: {
+                if (firstclick) {
+                    alarmList.model.clear()
+                    firstclick = false
+                }
+                bar.currentIndex = 1
+            }
         }
     }
     StackLayout {
@@ -130,7 +144,7 @@ ApplicationWindow {
                 msgDialog.open()
             }
             if (mainStack.currentIndex !== 0) {
-//                msgSound.play()
+                monitor.play()
                 msgButtonHighlighter.start()
             }
 

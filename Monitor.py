@@ -228,11 +228,11 @@ class Monitor():
     def add_criteria(self, d_ratio, d_time, cooldown):
         new_criteria = Criteria(self.criteria_id, d_ratio, d_time, cooldown)
         self.criteria_lock.acquire(blocking=True)
-        self.criteria_id += 1
         cid = self.criteria_id
+        self.criteria_id += 1
         self.criteria.append(new_criteria)
         self.criteria_lock.release()
-        return cid - 1
+        return cid
 
     # def list_criteria(self):
     # 	text = ""
@@ -253,6 +253,9 @@ class Monitor():
                 return True
         self.criteria_lock.release()
         return False
+    
+    def end(self):
+        os._exit(0)
 
     # def list_messages(self):
     # 	text = ""

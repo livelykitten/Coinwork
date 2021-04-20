@@ -25,7 +25,7 @@ Dialog {
             Layout.fillWidth: true
         }
         Label {
-            text: " At least " + new_msg_num.toString() + " messages arrived.\nCheck message box!"
+            text: new_msg_num.toString() + "개 이상의 메세지가 추가로 도착했습니다.\n메세지함을 확인해주세요!"
             Layout.fillWidth: true
         }
     }

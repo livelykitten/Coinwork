@@ -11,11 +11,13 @@ from collections import deque
 from os.path import abspath, dirname, join
 
 from PySide6.QtCore import QObject, Slot
-from PySide6.QtGui import QGuiApplication
+from PySide6.QtGui import QGuiApplication, QFont
 from PySide6.QtQml import QQmlApplicationEngine
 
 import UpbitWrapper
 import Monitor
+
+import pygame
 
 
 # from style_py import *
@@ -27,6 +29,25 @@ class MonitorBridge(QObject):
         super().__init__()
         self.monitor = Monitor.Monitor()
         self.monitor.start()
+        pygame.mixer.init()
+        pygame.mixer.music.load("alarm.wav")
+
+        return
+
+    @Slot()
+    def play(self):
+        if not pygame.mixer.music.get_busy():
+            pygame.mixer.music.play(loops=-1)
+        return
+
+    @Slot()
+    def pause(self):
+        pygame.mixer.music.stop()
+        return
+
+    @Slot()
+    def end(self):
+        self.monitor.end()
         return
 
     @Slot(result=str)

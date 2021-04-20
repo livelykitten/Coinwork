@@ -12,18 +12,33 @@ ItemDelegate {
     width: ListView.view.width
     anchors.leftMargin: 100
     anchors.rightMargin: 100
-    contentItem: ColumnLayout {
-        Label {
-            text: "Alarm #" + model.alarm_id.toString()
+    contentItem: RowLayout {
+        ColumnLayout {
+            Label {
+                text: "알람 번호 #" + model.alarm_id.toString()
+            }
+            Label {
+                text: "변동 비율: " + (model.alarm_d_ratio * 100).toString() + "%"
+            }
+            Label {
+                text: "시간 간격: " + Math.floor(model.alarm_d_time / 60).toString() + " 분 " + (model.alarm_d_time % 60).toString() + " 초"
+            }
+            Label {
+                text: "알림 주기: " + (model.alarm_cooldown / 60).toString() + " 분"
+            }
         }
-        Label {
-            text: "d_ratio: " + (model.alarm_d_ratio * 100).toString() + "%"
+        Item {
+            Layout.fillWidth: true
         }
-        Label {
-            text: "d_time: " + Math.floor(model.alarm_d_time / 60).toString() + " min " + (model.alarm_d_time % 60).toString() + " sec"
-        }
-        Label {
-            text: "cooldown: " + (model.alarm_cooldown / 60).toString() + " min "
+
+        Button {
+            text: "삭제"
+            onClicked: {
+                if (model.alarm_id !== 0) {
+                    console.log(monitor.remove_criteria(model.alarm_id))
+                }
+                root.ListView.view.model.remove(index)
+            }
         }
     }
 }

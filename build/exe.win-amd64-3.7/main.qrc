@@ -1,0 +1,12 @@
+<RCC>
+    <qresource prefix="/">
+        <file>main.qml</file>
+        <file>MsgModel.qml</file>
+        <file>MsgDelegate.qml</file>
+        <file>AlarmModel.qml</file>
+        <file>AlarmDelegate.qml</file>
+        <file>AlarmDialog.qml</file>
+        <file>MsgDialog.qml</file>
+        <file>alarm.wav</file>
+    </qresource>
+</RCC>
