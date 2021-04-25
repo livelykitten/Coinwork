@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE QtCreatorProject>
-<!-- Written by QtCreator 4.14.2, 2021-04-20T15:37:06. -->
+<!-- Written by QtCreator 4.14.2, 2021-04-25T06:32:24. -->
 <qtcreator>
  <data>
   <variable>EnvironmentId</variable>
@@ -244,7 +244,7 @@
     <value type="QString" key="ProjectExplorer.ProjectConfiguration.DisplayName">main</value>
     <value type="QString" key="ProjectExplorer.ProjectConfiguration.Id">PythonEditor.RunConfiguration.C:/Users/Tony Min/Documents/Coinwork/main.py</value>
     <value type="QString" key="ProjectExplorer.RunConfiguration.BuildKey">C:/Users/Tony Min/Documents/Coinwork/main.py</value>
-    <value type="QString" key="PythonEditor.RunConfiguation.Interpreter">{92d375fe-f3f6-4dd7-9a8f-a89f27b74ee5}</value>
+    <value type="QString" key="PythonEditor.RunConfiguation.Interpreter">{1560eded-34b8-4a43-9385-8a203c8c1c7a}</value>
     <value type="QString" key="PythonEditor.RunConfiguation.Script">C:\Users\Tony Min\Documents\Coinwork\main.py</value>
     <value type="bool" key="RunConfiguration.UseCppDebugger">false</value>
     <value type="bool" key="RunConfiguration.UseCppDebuggerAuto">true</value>

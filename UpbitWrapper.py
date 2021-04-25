@@ -20,6 +20,8 @@ def get_all_markets():
 
 	markets = {}
 	for market_item in markets_list_raw:
+		# if market_item['market'] != "KRW-BTC":
+		# 	continue
 		markets[market_item['market']] = market_item["korean_name"] + "/" + market_item["english_name"]
 	
 	return markets

@@ -76,7 +76,6 @@ bridge = MonitorBridge()
 context = engine.rootContext()
 context.setContextProperty("monitor", bridge)
 
-
 engine.load(os.path.join(os.path.dirname(__file__), "main.qml"))
 
 if not engine.rootObjects():

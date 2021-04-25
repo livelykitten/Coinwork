@@ -28,11 +28,12 @@ def tdstr(td):
     return days + hours + minutes + seconds + ms + "초"
 
 class Ticker:
-    def __init__(self, market_name, market_cap, price, timestamp):
+    def __init__(self, market_name, market_cap, price, timestamp, acc_tp):
         self.market_name = market_name
         self.market_cap = market_cap
         self.price = price
         self.timestamp = timestamp
+        self.acc_tp = acc_tp
         
 class MarketMonitor:
     def __init__(self, change, market, interval, cooldown):
@@ -43,46 +44,71 @@ class MarketMonitor:
         self.container = deque()
         self.is_active = True
         self.time_disabled = 0
+
+        self.max_item = None
+        self.min_item = None
         
     def state_report(self):
         print('---------------')
         print(f"is_active: {self.is_active}")
-        print(f"ALARM_SWITCH: {ALARM_SWITCH}")
         print(f"num_item: {len(self.container)}")
-        #for i in range(len(self.container)):
-        #	print(f"price: {self.container[i].price} time: {self.container[i].timestamp}")
+        for i in range(len(self.container)):
+        	print(f"price: {self.container[i].price} time: {self.container[i].timestamp}")
+        if self.max_item != None:
+            print(f"max: {self.max_item.price} time: {self.max_item.timestamp}")
         print('---------------')
     
-    def update_ticker(self, item):
+    def dbg(self):
+        prev = None
+        for i in range(len(self.container)):
+            cur = self.container[i]
+            if prev != None:
+                if cur.timestamp >= prev:
+                    print(f"bug exists: {cur.timestamp} {prev.timestamp}")
+            if self.max_item != None and self.max_item.price < cur.price:
+                print(f"bug exists {self.max_item.price} {cur.price}")
     
+    def cmp_n_update_max_min(self, item):
+        if self.change > 0:
+            if self.max_item == None or self.max_item.price <= item.price:
+                self.max_item = item
+        else:
+            if self.min_item == None or self.min_item.price <= item.price:
+                self.min_item = item
+
+    def get_max_min(self):
+        if self.change > 0:
+            return self.max_item
+        else:
+            return self.min_item
+
+    def add_item(self, item):
+        # add an item
+
         # self.state_report()
         
-        # print(f"newcomer: {item.timestamp}")
-        # restore alarm if disabled
-        if self.is_active == False:
-            alarm_checked = False
-            timestamp_now = datetime.datetime.now().timestamp()
-            if self.time_disabled + self.cooldown < timestamp_now:
-                self.is_active = True
-        
-        # add an item
-        idx = 0
         if len(self.container) == 0:
             self.container.append(item)
             return None
         
-        while idx < len(self.container) and \
-            self.container[idx].timestamp >= item.timestamp:
-            # print(f"<<comparing {self.container[idx].timestamp} and {item.timestamp}")
-            if self.container[idx].timestamp == item.timestamp:
+        
+        tmp_first = self.container.popleft()
+        self.container.appendleft(tmp_first)
+
+        idx = 0
+        outranged = None
+        
+        for i in range(len(self.container)):
+            if self.container[i].timestamp > item.timestamp:
+                idx += 1
+            elif self.container[i].timestamp == item.timestamp:
                 return None
-            idx += 1
+
         if idx == len(self.container):
             self.container.append(item)
         else:
             self.container.insert(idx, item)
         
-        # determine the newest
         first = self.container.popleft()
         self.container.appendleft(first)
         
@@ -90,6 +116,7 @@ class MarketMonitor:
         last = self.container.pop()
         if last.timestamp + self.interval > first.timestamp:
             self.container.append(last)
+            # no outranged
             return None
         
         # determine the last outranged
@@ -98,31 +125,87 @@ class MarketMonitor:
             last != item:
             outranged = last
             last = self.container.pop()
-        
+
         self.container.append(last)
+
+        return outranged
+    
+    def check_cooldown(self):
+        # restore alarm if disabled
+        if self.is_active == False:
+            alarm_checked = False
+            timestamp_now = datetime.datetime.now().timestamp()
+            if self.time_disabled + self.cooldown < timestamp_now:
+                self.is_active = True
+    
+    def update_ticker(self, item):
+
+        self.check_cooldown()
         
-        true_interval = item.timestamp - outranged.timestamp
-        true_change = (item.price - outranged.price) / item.price
+        cmp_item = self.add_item(item)
+        if len(self.container) < 2:
+            return None
+        if cmp_item == None:
+            cmp_item = self.container.pop()
+            self.container.append(cmp_item)
+
+        first = self.container.popleft()
+        self.container.appendleft(first)
+
+        for i in self.container:
+            self.cmp_n_update_max_min(i)
+        self.cmp_n_update_max_min(cmp_item)
+
+        if self.change > 0:
+            if self.max_item != None and self.max_item.timestamp + self.interval < first.timestamp:
+                self.max_item = None
+        else:
+            if self.min_item != None and self.min_item.timestamp + self.interval < first.timestamp:
+                self.min_item = None
+
+        if self.change > 0:
+            if self.max_item != None and self.max_item.price > cmp_item.price: 
+                cmp_item = self.max_item
+            else:
+                cmp_item = cmp_item
+        else:
+            if self.min_item != None and self.min_item.price < cmp_item.price: 
+                cmp_item = self.min_item
+            else:
+                cmp_item = cmp_item
         
+        true_interval = item.timestamp - cmp_item.timestamp
+        true_change = (item.price - cmp_item.price) / item.price
+
+        if true_interval == 0 or true_change == 0:
+            return None
+        
+        self.dbg()
+        
+        # print(f"{true_change} {self.change} {self.change} {self.change}")
         # if satisfies condition, send off an alarm
-        if abs(true_change) > abs(self.change) and true_change * self.change > 0 and self.is_active:
+        c1 = abs(true_change) > abs(self.change)
+        c2 = abs(true_change) / true_change == abs(self.change) / self.change
+        c3 = true_interval != 0
+        if c1 and c2 and c3 and self.is_active:
             # print("-----------------------")
             # print(self.market_code)
             # print(f"first time {first.timestamp} last time {outranged.timestamp}")
             # print(f"first price {first.price} last price {outranged.price}")
             self.time_disabled = datetime.datetime.now().timestamp()
             self.is_active = False
-            return Alarm(first.timestamp, self.market_code, first.market_name, 0, true_change, true_interval)
+            return Alarm(first.timestamp, self.market_code, first.market_name, 0, true_change, true_interval, first.acc_tp)
         return None
 
 class Alarm:
-    def __init__(self, time, market_code, market_name, market_cap, d_ratio, d_time):
+    def __init__(self, time, market_code, market_name, market_cap, d_ratio, d_time, acc_tp):
         # text = market_code_to_kor[self.market_code] + "(" + self.market + "): "
         self.msg_timestamp = time
         self.msg_market = market_name + "(" + market_code + ")"
         self.msg_text = market_name + "(" + market_code + "): "
-        self.msg_text += "지난 " + tdstr(datetime.timedelta(seconds=d_time)) + " 동안"
-        self.msg_text += f"{d_ratio * 100:.3f}% 변화했습니다\n"
+        # self.msg_text += "지난 " + tdstr(datetime.timedelta(seconds=d_time)) + " 동안"
+        # self.msg_text += f"{d_ratio * 100:.3f}% 변화했습니다\n"
+        self.msg_text += f"거래대금: {int(acc_tp / 1000000)}백만\n"
         self.user_checked = False
         # self.text += f"현재 시세는 {cur_price:.2f}, 현재 시간은 {datetime.datetime.fromtimestamp(time)} 입니다"
         # self.msg_text += f"현재 시간은 {datetime.datetime.fromtimestamp(time)} 입니다"
@@ -143,15 +226,15 @@ class Criteria:
             
     
     def update_monitors(self, new_items):
-        alarms = []
+        # alarms = []
         for market, item in new_items.items():
             if market not in self.monitor_dict.keys():
                 self.add_monitor(market)
             ret = self.monitor_dict[market].update_ticker(item)
             if ret != None:
-                alarms.append(ret)
+                yield ret
         
-        return alarms
+        # return alarms
 
 
 class Monitor():
@@ -212,7 +295,7 @@ class Monitor():
                 continue
             cur_price = market['trade_price']
             timestamp = market['timestamp']  / 1e3
-            item = Ticker(markets[market['market']], 0, cur_price, timestamp)
+            item = Ticker(markets[market['market']], 0, cur_price, timestamp, market['acc_trade_price_24h'])
             market_tickers[market['market']] = item
 
         self.criteria_lock.acquire(blocking=True)
