@@ -43,6 +43,8 @@ def get_tickers(markets):
 	if not response.ok:
 		return None
 	
+	print(f"remaining reqs {response.headers['Remaining-Req']}")
+	
 	r_dict = json.loads(response.text)
 		# 시가 총액도 가능하면 넣자
 	
