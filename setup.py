@@ -4,7 +4,7 @@ buildOptions = dict(packages=['requests', 'time', 'threading', 'json', 'datetime
 excludes = ["tkinter", "numpy"],
 include_files = ['./alarm.wav'], include_msvcr=True)
  
-exe = [Executable('main.py', base = "Win32GUI")]
+exe = [Executable('Document1.py')]
  
 setup(
     name='CoinWatcher',
