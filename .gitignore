@@ -1,2 +1,6 @@
 
 *.pyc
+build/*
+prod/*
+dist/*
+__pycache__/*
