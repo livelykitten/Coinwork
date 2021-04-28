@@ -132,7 +132,7 @@ ApplicationWindow {
                         break
                     }
                 }
-                if (j < msgList.model.count)
+                if (j === msgList.model.count)
                     msgList.model.append(new_item)
             }
             while (Date.now() / 1000 - msgList.model.get(msgList.model.count - 1).msg_timestamp >= 86400) {

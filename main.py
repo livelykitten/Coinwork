@@ -30,7 +30,7 @@ class MonitorBridge(QObject):
         self.monitor = Monitor.Monitor()
         self.monitor.start()
         pygame.mixer.init()
-        pygame.mixer.music.load("alarm.wav")
+        pygame.mixer.music.load("./alarm.wav")
 
         return
 

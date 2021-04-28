@@ -54,81 +54,9 @@ class MarketMonitor:
         print(f"num_item: {len(self.container)}")
         for i in range(len(self.container)):
         	print(f"price: {self.container[i].price} time: {self.container[i].timestamp}")
-        if self.max_item != None:
-            print(f"max: {self.max_item.price} time: {self.max_item.timestamp}")
+        if self.min_item != None:
+            print(f"min: {self.min_item.price} time: {self.min_item.timestamp}")
         print('---------------')
-    
-    def dbg(self):
-        prev = None
-        for i in range(len(self.container)):
-            cur = self.container[i]
-            if prev != None:
-                if cur.timestamp >= prev:
-                    print(f"bug exists: {cur.timestamp} {prev.timestamp}")
-            if self.max_item != None and self.max_item.price < cur.price:
-                print(f"bug exists {self.max_item.price} {cur.price}")
-    
-    def cmp_n_update_max_min(self, item):
-        if self.change > 0:
-            if self.max_item == None or self.max_item.price <= item.price:
-                self.max_item = item
-        else:
-            if self.min_item == None or self.min_item.price <= item.price:
-                self.min_item = item
-
-    def get_max_min(self):
-        if self.change > 0:
-            return self.max_item
-        else:
-            return self.min_item
-
-    def add_item(self, item):
-        # add an item
-
-        # self.state_report()
-        
-        if len(self.container) == 0:
-            self.container.append(item)
-            return None
-        
-        
-        tmp_first = self.container.popleft()
-        self.container.appendleft(tmp_first)
-
-        idx = 0
-        outranged = None
-        
-        for i in range(len(self.container)):
-            if self.container[i].timestamp > item.timestamp:
-                idx += 1
-            elif self.container[i].timestamp == item.timestamp:
-                return None
-
-        if idx == len(self.container):
-            self.container.append(item)
-        else:
-            self.container.insert(idx, item)
-        
-        first = self.container.popleft()
-        self.container.appendleft(first)
-        
-        # determine the last
-        last = self.container.pop()
-        if last.timestamp + self.interval > first.timestamp:
-            self.container.append(last)
-            # no outranged
-            return None
-        
-        # determine the last outranged
-        outranged = last
-        while last.timestamp + self.interval < item.timestamp and \
-            last != item:
-            outranged = last
-            last = self.container.pop()
-
-        self.container.append(last)
-
-        return outranged
     
     def check_cooldown(self):
         # restore alarm if disabled
@@ -138,63 +66,85 @@ class MarketMonitor:
             if self.time_disabled + self.cooldown < timestamp_now:
                 self.is_active = True
     
-    def update_ticker(self, item):
+    def update_ticker(self, new_item):
 
         self.check_cooldown()
-        
-        cmp_item = self.add_item(item)
-        if len(self.container) < 2:
-            return None
-        if cmp_item == None:
-            cmp_item = self.container.pop()
-            self.container.append(cmp_item)
 
+        if len(self.container) == 0:
+            self.container.append(new_item)
+            return None
+        
         first = self.container.popleft()
         self.container.appendleft(first)
 
-        for i in self.container:
-            self.cmp_n_update_max_min(i)
-        self.cmp_n_update_max_min(cmp_item)
-
-        if self.change > 0:
-            if self.max_item != None and self.max_item.timestamp + self.interval < first.timestamp:
-                self.max_item = None
-        else:
-            if self.min_item != None and self.min_item.timestamp + self.interval < first.timestamp:
-                self.min_item = None
-
-        if self.change > 0:
-            if self.max_item != None and self.max_item.price > cmp_item.price: 
-                cmp_item = self.max_item
-            else:
-                cmp_item = cmp_item
-        else:
-            if self.min_item != None and self.min_item.price < cmp_item.price: 
-                cmp_item = self.min_item
-            else:
-                cmp_item = cmp_item
+        ins_idx = 0
+        max_idx = 0
+        outdated_idx = 0
+        inserted = False
+        outdated = False
+        self.max_item = new_item
+        self.min_item = new_item
+        for i, item in enumerate(self.container):
+            if item.timestamp == new_item.timestamp:
+                return None
+            if not outdated and \
+                    item.timestamp + self.interval < first.timestamp or \
+                    item.timestamp + self.interval < new_item.timestamp:
+                outdated = True
+                outdated_idx = i
+            if not inserted and item.timestamp <= new_item.timestamp:
+                ins_idx = i
+                inserted = True
+            if not outdated and self.max_item.price < item.price:
+                self.max_item = item
+            if not outdated and self.min_item.price > item.price:
+                self.min_item = item
         
-        true_interval = item.timestamp - cmp_item.timestamp
-        true_change = (item.price - cmp_item.price) / item.price
+        if inserted:
+            self.container.insert(ins_idx, new_item)
+        else:
+            self.container.append(new_item)
 
-        if true_interval == 0 or true_change == 0:
+        outdated_item = None
+        if outdated:
+            outdated_item == self.container[outdated_idx]
+            while len(self.container) >= outdated_idx and len(self.container) > 0:
+                self.container.pop()
+        
+        if len(self.container) == 0:
             return None
         
-        self.dbg()
+        first = self.container.popleft()
+        self.container.appendleft(first)
         
-        # print(f"{true_change} {self.change} {self.change} {self.change}")
-        # if satisfies condition, send off an alarm
-        c1 = abs(true_change) > abs(self.change)
-        c2 = abs(true_change) / true_change == abs(self.change) / self.change
-        c3 = true_interval != 0
-        if c1 and c2 and c3 and self.is_active:
-            # print("-----------------------")
-            # print(self.market_code)
-            # print(f"first time {first.timestamp} last time {outranged.timestamp}")
-            # print(f"first price {first.price} last price {outranged.price}")
-            self.time_disabled = datetime.datetime.now().timestamp()
-            self.is_active = False
-            return Alarm(first.timestamp, self.market_code, first.market_name, 0, true_change, true_interval, first.acc_tp)
+        cmp_item = None
+        if self.change < 0:
+            if outdated_item != None and outdated_item.price > self.max_item.price:
+                cmp_item = outdated_item
+            else:
+                cmp_item = self.max_item
+            highest_change = (new_item.price - cmp_item.price) / first.price
+            time_taken = (new_item.timestamp - cmp_item.timestamp)
+            if highest_change < self.change and time_taken > 0 and self.is_active:
+                self.time_disabled = datetime.datetime.now().timestamp()
+                self.is_active = False
+                return Alarm(first.timestamp, self.market_code, first.market_name, 0, highest_change, time_taken, first.acc_tp)
+
+        else:
+            if outdated_item != None and outdated_item.price < self.min_item.price:
+                cmp_item = outdated_item
+            else:
+                cmp_item = self.min_item
+            
+            highest_change = (new_item.price - cmp_item.price) / first.price
+            time_taken = (new_item.timestamp - cmp_item.timestamp)
+            if highest_change > self.change and time_taken > 0 and self.is_active:
+                # self.state_report()
+                # print(f"new p {new_item.price} new t {new_item.timestamp} cmp_item p {cmp_item.price} cmp_item t {cmp_item.timestamp}")
+                self.time_disabled = datetime.datetime.now().timestamp()
+                self.is_active = False
+                return Alarm(first.timestamp, self.market_code, first.market_name, 0, highest_change, time_taken, first.acc_tp)
+        
         return None
 
 class Alarm:
@@ -273,8 +223,13 @@ class Monitor():
         return
     
     def _monitor_wrapper(self):
+        prev = datetime.datetime.now()
         self._monitor()
-        threading.Timer(0.1, Monitor._monitor_wrapper, args=(self,)).start()
+        time_taken = (datetime.datetime.now() - prev).total_seconds()
+        if time_taken < 0.1:
+            threading.Timer(0.1 - time_taken, Monitor._monitor_wrapper, args=(self,)).start()
+        else:
+            threading.Thread(target=Monitor._monitor_wrapper, args=(self,)).start()
     
     def start(self):
         threading.Thread(target=Monitor._monitor_wrapper, args=(self,)).start()
