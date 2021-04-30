@@ -36,6 +36,7 @@ ItemDelegate {
     }
     onClicked: {
         highlighted = false
-        is_read.text = "읽음"
+        model.user_checked = true
+        monitor.pause()
     }
 }

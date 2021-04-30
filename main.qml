@@ -19,6 +19,7 @@ ApplicationWindow {
         monitor.end()
     }
 
+
     header: TabBar {
         id: bar
         width: parent.width
@@ -60,6 +61,17 @@ ApplicationWindow {
                 model: MsgModel {}
                 delegate: MsgDelegate {}
             }
+            RoundButton {
+                id: msgListNavButton
+                text: "^"
+                anchors.bottom: msgList.bottom
+                anchors.bottomMargin: 8
+                anchors.horizontalCenter: parent.horizontalCenter
+                onClicked: {
+                    msgList.positionViewAtBeginning()
+                }
+            }
+
         }
         Item {
             id: alarmTab

@@ -37,7 +37,7 @@ class MonitorBridge(QObject):
     @Slot()
     def play(self):
         if not pygame.mixer.music.get_busy():
-            pygame.mixer.music.play(loops=-1)
+            pygame.mixer.music.play(loops=0)
         return
 
     @Slot()
